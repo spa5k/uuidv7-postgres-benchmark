@@ -1,97 +1,65 @@
 -- PostgreSQL 18 Native UUIDv7 Support
 -- This script adds native uuidv7() function testing for PostgreSQL 18
 
--- Check if we're running on PostgreSQL 18+
-DO $$
+-- Create wrapper functions for consistent benchmarking
+-- These will only work on PostgreSQL 18+ due to native uuidv7() support
+CREATE OR REPLACE FUNCTION uuidv7_native()
+RETURNS uuid
+AS $$
 DECLARE
     pg_version_num INTEGER;
 BEGIN
     SELECT current_setting('server_version_num')::INTEGER INTO pg_version_num;
     
-    -- PostgreSQL 18 has version number 180000+
     IF pg_version_num >= 180000 THEN
-        RAISE NOTICE 'PostgreSQL 18+ detected - native uuidv7() support available';
-        
-        -- Test native uuidv7() function
-        PERFORM uuidv7();
-        RAISE NOTICE 'Native uuidv7() function working correctly';
-        
-        -- Test uuidv4() alias  
-        PERFORM uuidv4();
-        RAISE NOTICE 'Native uuidv4() alias working correctly';
-        
-        -- Create wrapper functions for consistent benchmarking
-        CREATE OR REPLACE FUNCTION uuidv7_native()
-        RETURNS uuid
-        AS $$
-        BEGIN
-            RETURN uuidv7();
-        END;
-        $$ LANGUAGE plpgsql VOLATILE;
-        
-        -- Function to generate UUIDv7 with time offset (unique to PG18)
-        CREATE OR REPLACE FUNCTION uuidv7_native_offset(time_offset INTERVAL DEFAULT '0 seconds')
-        RETURNS uuid
-        AS $$
-        BEGIN
-            RETURN uuidv7(time_offset);
-        END;
-        $$ LANGUAGE plpgsql VOLATILE;
-        
-        -- Function to extract timestamp from UUIDv7 (PG18 feature)
-        CREATE OR REPLACE FUNCTION test_uuid_extract_features()
-        RETURNS TABLE (
-            uuid_val uuid,
-            version_num INTEGER,
-            extracted_timestamp TIMESTAMPTZ
-        ) AS $$
-        DECLARE
-            test_uuid uuid;
-        BEGIN
-            -- Generate a test UUIDv7
-            test_uuid := uuidv7();
-            
-            RETURN QUERY SELECT 
-                test_uuid,
-                uuid_extract_version(test_uuid),
-                uuid_extract_timestamp(test_uuid);
-        END;
-        $$ LANGUAGE plpgsql VOLATILE;
-        
-        RAISE NOTICE 'PostgreSQL 18 native UUIDv7 functions configured successfully';
+        RETURN uuidv7();
     ELSE
-        RAISE NOTICE 'PostgreSQL version % - native uuidv7() not available', pg_version_num;
-        
-        -- Create dummy functions that will fail gracefully
-        CREATE OR REPLACE FUNCTION uuidv7_native()
-        RETURNS uuid
-        AS $$
-        BEGIN
-            RAISE EXCEPTION 'Native uuidv7() not available in PostgreSQL < 18';
-        END;
-        $$ LANGUAGE plpgsql VOLATILE;
-        
-        CREATE OR REPLACE FUNCTION uuidv7_native_offset(time_offset INTERVAL DEFAULT '0 seconds')
-        RETURNS uuid
-        AS $$
-        BEGIN
-            RAISE EXCEPTION 'Native uuidv7() with offset not available in PostgreSQL < 18';
-        END;
-        $$ LANGUAGE plpgsql VOLATILE;
-        
-        CREATE OR REPLACE FUNCTION test_uuid_extract_features()
-        RETURNS TABLE (
-            uuid_val uuid,
-            version_num INTEGER,
-            extracted_timestamp TIMESTAMPTZ
-        ) AS $$
-        BEGIN
-            RAISE EXCEPTION 'UUID extraction functions not available in PostgreSQL < 18';
-        END;
-        $$ LANGUAGE plpgsql VOLATILE;
+        RAISE EXCEPTION 'Native uuidv7() not available in PostgreSQL < 18 (current: %)', pg_version_num;
     END IF;
 END;
-$$;
+$$ LANGUAGE plpgsql VOLATILE;
+-- Function to generate UUIDv7 with time offset (unique to PG18)
+CREATE OR REPLACE FUNCTION uuidv7_native_offset(time_offset INTERVAL DEFAULT '0 seconds')
+RETURNS uuid
+AS $$
+DECLARE
+    pg_version_num INTEGER;
+BEGIN
+    SELECT current_setting('server_version_num')::INTEGER INTO pg_version_num;
+    
+    IF pg_version_num >= 180000 THEN
+        RETURN uuidv7(time_offset);
+    ELSE
+        RAISE EXCEPTION 'Native uuidv7() with offset not available in PostgreSQL < 18 (current: %)', pg_version_num;
+    END IF;
+END;
+$$ LANGUAGE plpgsql VOLATILE;
+-- Function to extract timestamp from UUIDv7 (PG18 feature)
+CREATE OR REPLACE FUNCTION test_uuid_extract_features()
+RETURNS TABLE (
+    uuid_val uuid,
+    version_num INTEGER,
+    extracted_timestamp TIMESTAMPTZ
+) AS $$
+DECLARE
+    test_uuid uuid;
+    pg_version_num INTEGER;
+BEGIN
+    SELECT current_setting('server_version_num')::INTEGER INTO pg_version_num;
+    
+    IF pg_version_num >= 180000 THEN
+        -- Generate a test UUIDv7
+        test_uuid := uuidv7();
+        
+        RETURN QUERY SELECT 
+            test_uuid,
+            uuid_extract_version(test_uuid),
+            uuid_extract_timestamp(test_uuid);
+    ELSE
+        RAISE EXCEPTION 'UUID extraction functions not available in PostgreSQL < 18 (current: %)', pg_version_num;
+    END IF;
+END;
+$$ LANGUAGE plpgsql VOLATILE;
 
 -- Function to compare native vs custom implementations (PostgreSQL 18 only)
 CREATE OR REPLACE FUNCTION compare_uuidv7_implementations(iterations INTEGER DEFAULT 1000)

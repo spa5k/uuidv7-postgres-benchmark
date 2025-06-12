@@ -1,0 +1,81 @@
+{
+  "metadata": {
+    "benchmark_completed": "2025-06-12T18:55:36.339211+00:00",
+    "total_execution_time_seconds": 6.625210762023926,
+    "configuration": {
+      "warmup_iterations": 1000,
+      "single_thread_iterations": 5000,
+      "concurrent_workers": 10,
+      "concurrent_iterations_per_worker": 1000,
+      "benchmark_runs": 3,
+      "function_timeout_seconds": 30,
+      "connection_timeout_seconds": 10,
+      "max_memory_usage_mb": 1024,
+      "detailed_logging": true,
+      "export_raw_data": true,
+      "generate_charts": true
+    },
+    "databases_tested": [
+      "postgresql17",
+      "postgresql18"
+    ],
+    "functions_tested": [
+      "uuid_generate_v7"
+    ]
+  },
+  "summary_statistics": {
+    "postgresql17": {
+      "uuid_generate_v7": {
+        "avg_single_thread_us": 78.62742879999999,
+        "avg_throughput_per_second": 18084.001187917722,
+        "consistency_coefficient": 0.016341161029760704,
+        "runs_completed": 3,
+        "postgres_version": 17
+      }
+    },
+    "postgresql18": {
+      "uuid_generate_v7": {
+        "avg_single_thread_us": 85.26910706666666,
+        "avg_throughput_per_second": 18188.499651246133,
+        "consistency_coefficient": 0.09739149516310334,
+        "runs_completed": 3,
+        "postgres_version": 18
+      }
+    }
+  },
+  "performance_rankings": {
+    "fastest_single_thread": [
+      {
+        "database": "postgresql17",
+        "function": "uuid_generate_v7",
+        "single_thread_us": 78.62742879999999,
+        "throughput_ops_sec": 18084.001187917722,
+        "postgres_version": 17
+      },
+      {
+        "database": "postgresql18",
+        "function": "uuid_generate_v7",
+        "single_thread_us": 85.26910706666666,
+        "throughput_ops_sec": 18188.499651246133,
+        "postgres_version": 18
+      }
+    ],
+    "highest_throughput": [
+      {
+        "database": "postgresql18",
+        "function": "uuid_generate_v7",
+        "single_thread_us": 85.26910706666666,
+        "throughput_ops_sec": 18188.499651246133,
+        "postgres_version": 18
+      },
+      {
+        "database": "postgresql17",
+        "function": "uuid_generate_v7",
+        "single_thread_us": 78.62742879999999,
+        "throughput_ops_sec": 18084.001187917722,
+        "postgres_version": 17
+      }
+    ]
+  },
+  "database_comparison": {}
+}

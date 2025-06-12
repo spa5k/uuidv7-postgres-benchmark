@@ -38,14 +38,9 @@ class DatabaseManager:
         """Get a database connection with proper error handling"""
         conn = None
         try:
-            conn = psycopg.connect(
-                host=config.host,
-                port=config.port,
-                database=config.database,
-                user=config.user,
-                password=config.password,
-                connect_timeout=10,
-            )
+            # Use conninfo string format for psycopg3 compatibility
+            conninfo = f"host={config.host} port={config.port} dbname={config.database} user={config.user} password={config.password} connect_timeout=10"
+            conn = psycopg.connect(conninfo)
             yield conn
         except Exception as e:
             logger.error(f"Database connection failed: {e}")

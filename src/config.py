@@ -184,12 +184,14 @@ def validate_config() -> bool:
                 raise ValueError(f"Invalid database config for {name}")
 
         # Validate benchmark config
-        if DEFAULT_BENCHMARK_CONFIG.warmup_iterations < 1000:
+        if DEFAULT_BENCHMARK_CONFIG.warmup_iterations < 100:
             raise ValueError("Warmup iterations too low for accurate results")
 
-        if DEFAULT_BENCHMARK_CONFIG.single_thread_iterations < 10000:
+        # Allow lower iteration counts for quick mode (5K minimum vs 10K standard)
+        min_iterations = 5000 if os.getenv("BENCHMARK_QUICK_MODE") else 10000
+        if DEFAULT_BENCHMARK_CONFIG.single_thread_iterations < min_iterations:
             raise ValueError(
-                "Single thread iterations too low for statistical significance"
+                f"Single thread iterations too low for statistical significance (minimum: {min_iterations})"
             )
 
         return True

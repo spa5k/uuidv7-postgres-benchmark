@@ -327,7 +327,7 @@ class DataExporter:
         ax1.set_xlabel("Implementation", fontweight="bold")
         ax1.set_ylabel("Average Time (microseconds)", fontweight="bold")
         ax1.tick_params(axis="x", rotation=45)
-        ax1.legend(title="PostgreSQL Version", fontweight="bold")
+        ax1.legend(title="PostgreSQL Version", title_fontsize="large")
 
         # 2. Throughput comparison
         ax2 = axes[0, 1]
@@ -340,7 +340,7 @@ class DataExporter:
         ax2.set_xlabel("Implementation", fontweight="bold")
         ax2.set_ylabel("Operations per Second", fontweight="bold")
         ax2.tick_params(axis="x", rotation=45)
-        ax2.legend(title="PostgreSQL Version", fontweight="bold")
+        ax2.legend(title="PostgreSQL Version", title_fontsize="large")
 
         # 3. Performance vs Consistency scatter
         ax3 = axes[1, 0]

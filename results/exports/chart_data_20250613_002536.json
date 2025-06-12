@@ -1,0 +1,61 @@
+{
+  "bar_chart_single_thread": [
+    {
+      "function": "uuid_generate_v7",
+      "database": "postgresql17",
+      "avg_time_us": 78.62742879999999,
+      "postgres_version": "PG17"
+    },
+    {
+      "function": "uuid_generate_v7",
+      "database": "postgresql18",
+      "avg_time_us": 85.26910706666666,
+      "postgres_version": "PG18"
+    }
+  ],
+  "bar_chart_throughput": [
+    {
+      "function": "uuid_generate_v7",
+      "database": "postgresql17",
+      "throughput_ops_sec": 18084.001187917722,
+      "postgres_version": "PG17"
+    },
+    {
+      "function": "uuid_generate_v7",
+      "database": "postgresql18",
+      "throughput_ops_sec": 18188.499651246133,
+      "postgres_version": "PG18"
+    }
+  ],
+  "line_chart_consistency": [
+    {
+      "function": "uuid_generate_v7",
+      "database": "postgresql17",
+      "coefficient_of_variation": 0.016341161029760704,
+      "std_dev_throughput": 122.31951553556956
+    },
+    {
+      "function": "uuid_generate_v7",
+      "database": "postgresql18",
+      "coefficient_of_variation": 0.09739149516310334,
+      "std_dev_throughput": 287.01604774969815
+    }
+  ],
+  "radar_chart_comparison": [
+    {
+      "function": "uuid_generate_v7",
+      "database": "postgresql17",
+      "speed_score": 7.789079181366299,
+      "throughput_score": 99.42546958060254,
+      "consistency_score": 98.36588389702393
+    },
+    {
+      "function": "uuid_generate_v7",
+      "database": "postgresql18",
+      "speed_score": 0.0,
+      "throughput_score": 100.0,
+      "consistency_score": 90.26085048368967
+    }
+  ],
+  "heatmap_data": []
+}

@@ -85,7 +85,10 @@ check_dependencies() {
     
     # Check Python version (minimum 3.8)
     python_version=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
-    if [[ $(echo "$python_version < 3.8" | bc -l) -eq 1 ]]; then
+    python_major=$(echo $python_version | cut -d. -f1)
+    python_minor=$(echo $python_version | cut -d. -f2)
+    
+    if [ "$python_major" -lt 3 ] || ([ "$python_major" -eq 3 ] && [ "$python_minor" -lt 8 ]); then
         error "Python 3.8+ required, found Python $python_version"
         exit 1
     fi
@@ -94,29 +97,52 @@ check_dependencies() {
 }
 
 setup_python_environment() {
-    log "Setting up Python environment..."
+    log "Setting up Python environment with UV..."
     
     cd "$SCRIPT_DIR"
     
-    # Create virtual environment if it doesn't exist
-    if [ ! -d "venv" ]; then
-        log "Creating Python virtual environment..."
-        python3 -m venv venv
+    # Check if UV is available
+    if command -v uv &> /dev/null; then
+        log "Using UV for Python environment management..."
+        
+        # Create virtual environment with UV if it doesn't exist
+        if [ ! -d "venv" ]; then
+            log "Creating Python virtual environment with UV..."
+            uv venv venv --python 3.8
+        fi
+        
+        # Install requirements with UV
+        log "Installing Python requirements with UV..."
+        uv pip install --python venv/bin/python -r requirements.txt > /dev/null 2>&1 || {
+            error "Failed to install Python requirements with UV"
+            exit 1
+        }
+    else
+        log "UV not found, falling back to pip..."
+        
+        # Create virtual environment if it doesn't exist
+        if [ ! -d "venv" ]; then
+            log "Creating Python virtual environment..."
+            python3 -m venv venv
+        fi
+        
+        # Activate virtual environment
+        source venv/bin/activate || {
+            error "Failed to activate virtual environment"
+            exit 1
+        }
+        
+        # Upgrade pip
+        log "Upgrading pip..."
+        pip install --upgrade pip > /dev/null 2>&1
+        
+        # Install requirements
+        log "Installing Python requirements..."
+        pip install -r requirements.txt > /dev/null 2>&1 || {
+            error "Failed to install Python requirements"
+            exit 1
+        }
     fi
-    
-    # Activate virtual environment
-    source venv/bin/activate
-    
-    # Upgrade pip
-    log "Upgrading pip..."
-    pip install --upgrade pip > /dev/null 2>&1
-    
-    # Install requirements
-    log "Installing Python requirements..."
-    pip install -r requirements.txt > /dev/null 2>&1 || {
-        error "Failed to install Python requirements"
-        exit 1
-    }
     
     success "Python environment ready"
 }
@@ -210,17 +236,20 @@ run_benchmark() {
     log "Running benchmark in $mode mode..."
     
     cd "$SCRIPT_DIR"
-    source venv/bin/activate
+    source venv/bin/activate || {
+        error "Failed to activate virtual environment for benchmark"
+        exit 1
+    }
     
     case "$mode" in
         "quick")
-            python3 professional_benchmark.py --quick --verbose
+            venv/bin/python professional_benchmark.py --quick --verbose
             ;;
         "extensive")
-            python3 professional_benchmark.py --extensive --verbose
+            venv/bin/python professional_benchmark.py --extensive --verbose
             ;;
         "standard"|*)
-            python3 professional_benchmark.py --verbose
+            venv/bin/python professional_benchmark.py --verbose
             ;;
     esac
 }

@@ -33,10 +33,10 @@ help:
 	@echo "  • PostgreSQL 17 vs 18 comparison"
 
 install:
-	@echo "Installing Python dependencies..."
-	python3 -m venv venv || true
-	./venv/bin/pip install --upgrade pip
-	./venv/bin/pip install -r requirements.txt
+	@echo "Installing Python dependencies with UV..."
+	@command -v uv >/dev/null 2>&1 || { echo "❌ UV not found. Install with: curl -LsSf https://astral.sh/uv/install.sh | sh"; exit 1; }
+	uv venv venv --python 3.8
+	uv pip install --python venv/bin/python -r requirements.txt
 	@echo "✅ Python environment ready"
 
 setup: install up
@@ -64,6 +64,8 @@ status:
 	@docker exec postgres18-uuidv7 pg_isready -U postgres 2>/dev/null && echo "✅ Ready" || echo "❌ Not Ready"
 
 test:
+	@echo "Testing Python dependencies..."
+	@venv/bin/python test_dependencies.py
 	@echo "Testing database connections..."
 	@./run_professional_benchmark.sh quick 2>/dev/null | grep -E "(✅|❌|Testing)" || echo "Run 'make up' first"
 
@@ -103,7 +105,7 @@ clean:
 .PHONY: dev-install dev-test dev-profile
 
 dev-install: install
-	./venv/bin/pip install pytest pytest-benchmark black flake8 mypy
+	@command -v uv >/dev/null 2>&1 && uv pip install --python venv/bin/python pytest pytest-benchmark black flake8 mypy || ./venv/bin/pip install pytest pytest-benchmark black flake8 mypy
 
 dev-test:
 	@echo "Running development tests..."

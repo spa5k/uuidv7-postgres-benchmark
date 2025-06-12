@@ -1,21 +1,12 @@
-# Professional PostgreSQL UUIDv7 Benchmark Suite Requirements
-# Updated for consistency and modern PostgreSQL support
+# Simplified requirements for UV package manager
+# Core packages for PostgreSQL UUIDv7 benchmarking
 
-# Database connectivity (using psycopg 3 for PostgreSQL 14+ support)
-psycopg[binary]==3.1.13
-psycopg2-binary==2.9.9  # Fallback compatibility
+# Database connectivity
+psycopg[binary]>=3.1.0
 
 # Data analysis and visualization
-matplotlib==3.8.2
-seaborn==0.13.0
-pandas==2.1.4
-numpy==1.26.2
-
-# Statistical analysis
-scipy==1.11.4
-
-# Performance monitoring
-memory-profiler==0.61.0
-
-# Data export formats
-openpyxl==3.1.2  # Excel export support
+pandas>=2.0.0
+numpy>=1.21.0
+matplotlib>=3.5.0
+seaborn>=0.11.0
+scipy>=1.7.0
