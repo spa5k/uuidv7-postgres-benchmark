@@ -15,7 +15,7 @@ services:
       - ./init:/docker-entrypoint-initdb.d
       - ./postgresql.conf:/etc/postgresql/postgresql.conf
     command: >
-      postgres 
+      postgres
       -c shared_buffers=256MB
       -c effective_cache_size=1GB
       -c maintenance_work_mem=64MB
@@ -34,10 +34,10 @@ services:
       resources:
         limits:
           memory: 2G
-          cpus: '2.0'
+          cpus: "2.0"
         reservations:
           memory: 1G
-          cpus: '1.0'
+          cpus: "1.0"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -60,7 +60,7 @@ services:
       - ./init:/docker-entrypoint-initdb.d
       - ./postgresql.conf:/etc/postgresql/postgresql.conf
     command: >
-      postgres 
+      postgres
       -c shared_buffers=256MB
       -c effective_cache_size=1GB
       -c maintenance_work_mem=64MB
@@ -79,10 +79,10 @@ services:
       resources:
         limits:
           memory: 2G
-          cpus: '2.0'
+          cpus: "2.0"
         reservations:
           memory: 1G
-          cpus: '1.0'
+          cpus: "1.0"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s

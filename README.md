@@ -15,13 +15,13 @@ make benchmark  # Run comprehensive benchmark
 
 ### Single-Thread Performance
 
-| Implementation | PostgreSQL | Avg Time (μs) | P95 (μs) | P99 (μs) | Throughput (ops/sec) |
-|----------------|------------|---------------|-----------|-----------|---------------------|
-| **Native uuidv7()** | **18** | **58.1** | **78.4** | **95.1** | **34,127** |
-| Custom uuidv7() | 17 | 87.3 | 112.8 | 134.2 | 29,456 |
-| UUIDv4 (baseline) | 17 | 86.8 | 111.4 | 132.9 | 29,238 |
-| ULID | 17 | 124.5 | 159.7 | 187.2 | 24,832 |
-| TypeID | 17 | 198.7 | 251.3 | 298.1 | 18,943 |
+| Implementation      | PostgreSQL | Avg Time (μs) | P95 (μs) | P99 (μs) | Throughput (ops/sec) |
+| ------------------- | ---------- | ------------- | -------- | -------- | -------------------- |
+| **Native uuidv7()** | **18**     | **58.1**      | **78.4** | **95.1** | **34,127**           |
+| Custom uuidv7()     | 17         | 87.3          | 112.8    | 134.2    | 29,456               |
+| UUIDv4 (baseline)   | 17         | 86.8          | 111.4    | 132.9    | 29,238               |
+| ULID                | 17         | 124.5         | 159.7    | 187.2    | 24,832               |
+| TypeID              | 17         | 198.7         | 251.3    | 298.1    | 18,943               |
 
 ### Key Findings
 
@@ -38,7 +38,7 @@ make benchmark  # Run comprehensive benchmark
 ### Functions Tested
 
 - **Native uuidv7()** - PostgreSQL 18 C-level implementation
-- **Custom UUIDv7** - PL/pgSQL and SQL implementations  
+- **Custom UUIDv7** - PL/pgSQL and SQL implementations
 - **ULID** - Base32-encoded time-ordered identifiers
 - **TypeID** - Type-safe prefixed identifiers
 - **UUIDv4** - Standard random UUID baseline
@@ -50,16 +50,19 @@ make benchmark  # Run comprehensive benchmark
 ## Usage
 
 ### Standard Benchmark
+
 ```bash
 make benchmark              # 50K iterations, ~20 minutes
 ```
 
 ### Quick Test
+
 ```bash
 make benchmark-quick        # 5K iterations, ~5 minutes
 ```
 
 ### Extensive Analysis
+
 ```bash
 make benchmark-extensive    # 100K iterations, ~60 minutes
 ```
@@ -75,7 +78,7 @@ make benchmark-extensive    # 100K iterations, ~60 minutes
 Results are generated in multiple formats:
 
 - **Charts**: `results/charts/` - Performance visualizations
-- **Reports**: `results/reports/` - Markdown summaries  
+- **Reports**: `results/reports/` - Markdown summaries
 - **Data**: `results/exports/` - JSON/CSV for analysis
 - **Raw**: `results/raw_data/` - Complete benchmark data
 
@@ -84,7 +87,7 @@ Results are generated in multiple formats:
 ## Container Configuration
 
 - **PostgreSQL 17**: Port 5434
-- **PostgreSQL 18**: Port 5435  
+- **PostgreSQL 18**: Port 5435
 - **Database**: `benchmark`
 - **Optimized**: 512MB shared buffers, 2GB cache
 

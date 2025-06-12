@@ -27,6 +27,7 @@ This is a **professional-grade PostgreSQL UUIDv7 benchmarking suite** that provi
 ## Common Commands
 
 ### Primary Commands
+
 ```bash
 # Complete setup and benchmark
 make setup                    # Install deps + start containers
@@ -47,6 +48,7 @@ make clean                   # Clean everything
 ```
 
 ### Direct Python Usage
+
 ```bash
 # Professional benchmark with options
 python3 professional_benchmark.py                    # Standard
@@ -60,6 +62,7 @@ python3 professional_benchmark.py --verbose         # Detailed logging
 This benchmark suite implements research-grade methodology:
 
 ### High-Precision Configuration
+
 - **Warmup**: 10,000 iterations per function
 - **Measurement**: 50,000 iterations for statistical significance
 - **Runs**: 5 complete runs per function for consistency analysis
@@ -67,11 +70,13 @@ This benchmark suite implements research-grade methodology:
 - **Workers**: 10 concurrent workers for throughput testing
 
 ### Database Configuration
+
 - **PostgreSQL 17**: Port 5434, optimized settings
 - **PostgreSQL 18**: Port 5435, native UUIDv7 + optimized settings
 - **Identical tuning**: 512MB shared buffers, 2GB cache, SSD optimization
 
 ### Output Structure
+
 ```bash
 results/
 ├── charts/           # Performance visualizations
@@ -84,16 +89,19 @@ results/
 ## Key Functions Tested
 
 ### UUIDv7 Implementations
+
 1. **`uuidv7_native()`** - PostgreSQL 18 native C implementation
 2. **`uuid_generate_v7()`** - PL/pgSQL with overlay method
 3. **`uuidv7_custom()`** - Pure SQL with bit manipulation
 4. **`uuidv7_sub_ms()`** - Sub-millisecond precision variant
 
 ### Alternative Identifiers
+
 5. **`ulid_generate()`** - ULID with Crockford Base32
 6. **`typeid_generate_text()`** - Type-safe prefixed identifiers
 
 ### Baseline
+
 7. **`gen_random_uuid()`** - PostgreSQL native UUIDv4
 
 ## Expected Performance Results
@@ -111,18 +119,21 @@ Throughput ranges from 18K-34K operations/second across implementations.
 ## Development Notes
 
 ### Database Architecture
+
 - Uses psycopg3 for PostgreSQL connectivity
 - Implements connection pooling and health checks
 - Applies benchmark-specific PostgreSQL optimizations
 - Validates function correctness before benchmarking
 
 ### Statistical Analysis
+
 - Multiple runs ensure consistency measurement
 - Calculates mean, median, standard deviation, P95, P99
 - Coefficient of variation for run-to-run consistency
 - Outlier detection using 3-sigma threshold
 
 ### Data Export
+
 - Structured JSON for programmatic analysis
 - CSV format for spreadsheet integration
 - Chart data optimized for web visualization
