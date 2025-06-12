@@ -2,7 +2,7 @@
 
 Professional performance comparison of UUID generation across PostgreSQL 17 and 18, featuring native UUIDv7 support.
 
-![Speed Comparison](images/speed_comparison.png)
+![Performance Overview](docs/images/performance_comparison.png)
 
 ## Quick Start
 
@@ -25,15 +25,34 @@ make benchmark  # Run comprehensive benchmark
 
 ### Key Findings
 
-- **PostgreSQL 18 native UUIDv7**: 33% faster than UUIDv4, 17% higher throughput
+- **PostgreSQL 18 native UUIDv7**: 33% faster than UUIDv4, 16% higher throughput
 - **Time-ordered performance**: Native implementation breaks the performance trade-off
 - **Production ready**: All implementations maintain >18K ops/sec throughput
+- **Sub-millisecond precision**: PG18 native supports microsecond-level ordering
+- **Zero-downtime migration**: Drop-in replacement for existing UUIDv4 columns
 
-![Performance Summary](images/performance_summary_diagram.png)
+![PostgreSQL Version Comparison](docs/images/postgresql_version_comparison.png)
+
+## Methodology
+
+Professional-grade benchmarking ensures statistical significance and real-world accuracy:
+
+### High-Precision Testing
+- **Warmup**: 10,000 iterations per function to eliminate cold-start effects
+- **Measurement**: 50,000 iterations for statistical significance (quick mode: 5,000)
+- **Runs**: 5 complete benchmark cycles per function for consistency analysis
+- **Timing**: Nanosecond precision using `time.perf_counter_ns()`
+- **Concurrency**: 10 workers × 5,000 iterations for realistic load testing
+
+### Statistical Analysis
+- **Percentiles**: P50, P95, P99 latency distribution analysis
+- **Consistency**: Coefficient of variation across multiple runs
+- **Outlier detection**: 3-sigma threshold for data quality
+- **Confidence**: 95% confidence intervals for all measurements
 
 ## Architecture
 
-![Implementation Architecture](images/implementation_architecture.png)
+![Latency Distribution](docs/images/percentile_comparison.png)
 
 ### Functions Tested
 
@@ -43,35 +62,36 @@ make benchmark  # Run comprehensive benchmark
 - **TypeID** - Type-safe prefixed identifiers
 - **UUIDv4** - Standard random UUID baseline
 
-### UUID Structure
+### Performance Analysis
 
-![UUID Structure](images/uuid_structure.png)
+![Performance Distribution](docs/images/comprehensive_overview.png)
 
 ## Usage
 
 ### Standard Benchmark
 
 ```bash
-make benchmark              # 50K iterations, ~20 minutes
+make benchmark              # 50K iterations, 5 runs, ~15-20 minutes
 ```
 
 ### Quick Test
 
 ```bash
-make benchmark-quick        # 5K iterations, ~5 minutes
+make benchmark-quick        # 5K iterations, 3 runs, ~3-5 minutes
 ```
 
 ### Extensive Analysis
 
 ```bash
-make benchmark-extensive    # 100K iterations, ~60 minutes
+make benchmark-extensive    # 100K iterations, 10 runs, ~45-60 minutes
 ```
 
 ## Requirements
 
-- Docker & Docker Compose
-- Python 3.8+
-- 6GB+ available memory
+- **Docker & Docker Compose** - Container management
+- **Python 3.8+** - Benchmark execution (managed with UV)
+- **6GB+ RAM** - PostgreSQL optimization (2GB × 2 instances + overhead)
+- **UV Package Manager** - Fast Python dependency resolution (auto-installed)
 
 ## Output
 
@@ -82,14 +102,15 @@ Results are generated in multiple formats:
 - **Data**: `results/exports/` - JSON/CSV for analysis
 - **Raw**: `results/raw_data/` - Complete benchmark data
 
-![Comprehensive Comparison](images/comprehensive_id_comparison.png)
+![Comprehensive Analysis](docs/images/comprehensive_overview.png)
 
 ## Container Configuration
 
-- **PostgreSQL 17**: Port 5434
-- **PostgreSQL 18**: Port 5435
-- **Database**: `benchmark`
-- **Optimized**: 512MB shared buffers, 2GB cache
+- **PostgreSQL 17**: Port 5434, optimized for benchmarking
+- **PostgreSQL 18**: Port 5435, native UUIDv7 + optimizations  
+- **Database**: `benchmark` with consistent schemas
+- **Performance tuning**: 256MB shared buffers, 1GB effective cache, SSD optimizations
+- **Resource limits**: 2GB RAM, 2 CPU cores per container
 
 ## Functions Available
 
@@ -120,20 +141,35 @@ SELECT uuid_extract_timestamp(id) FROM users;
 ## Development
 
 ```bash
-make install    # Setup Python environment
-make up         # Start containers
-make down       # Stop containers  
-make status     # Check health
-make logs       # View logs
-make clean      # Reset everything
+make install           # Setup Python environment with UV
+make up               # Start PostgreSQL containers
+make down             # Stop containers  
+make status           # Check container health
+make test             # Validate database connections
+make generate-graphs  # Create performance charts for README
+make logs             # View container logs
+make clean            # Reset everything (containers + results)
 ```
 
-## Technical Details
+## Technical Implementation
 
-- **Methodology**: 50K iterations, 5 runs, 10K warmup
-- **Precision**: Nanosecond timing accuracy
-- **Workers**: 10 concurrent for throughput testing
-- **Statistics**: Mean, median, P95, P99, coefficient of variation
+### Benchmark Engine
+- **Language**: Python 3.8+ with psycopg3 for optimal PostgreSQL performance  
+- **Timing**: Nanosecond precision using `time.perf_counter_ns()`
+- **Concurrency**: 10 workers × 5,000 iterations for realistic load testing
+- **Validation**: Function correctness testing before benchmarking
+
+### Database Optimization
+- **Connection tuning**: Optimized timeouts and pooling for consistent measurements
+- **Query optimization**: Direct function calls without SQL parsing overhead
+- **Memory management**: Controlled allocation and cleanup between runs
+- **Transaction isolation**: READ COMMITTED with consistent measurement environment
+
+### Statistical Analysis
+- **Methodology**: 50K iterations, 5 runs, 10K warmup for statistical significance
+- **Precision**: Nanosecond timing accuracy with outlier detection
+- **Metrics**: Mean, median, P50/P95/P99 latencies, coefficient of variation
+- **Reliability**: Multiple runs ensure consistent and reproducible results
 
 ---
 
