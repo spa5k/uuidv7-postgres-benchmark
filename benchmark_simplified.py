@@ -277,6 +277,7 @@ def benchmark_concurrent(function_name, workers, iterations_per_worker):
 def run_benchmarks():
     """Run all benchmarks"""
     functions = [
+        'gen_random_uuid',  # UUIDv4 for comparison
         'uuid_generate_v7',
         'uuidv7', 
         'uuidv7_sub_ms',
