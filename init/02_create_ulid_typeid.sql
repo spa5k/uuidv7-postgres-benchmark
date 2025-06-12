@@ -68,7 +68,7 @@ BEGIN
     combined_bytes := combined_bytes || random_bytes;
     
     -- Encode all 16 bytes as base32 (26 characters)
-    FOR i IN 15 DOWNTO 0 LOOP
+    FOR i IN REVERSE 15..0 LOOP
         byte_val := get_byte(combined_bytes, i) + carry * 256;
         result := substring(alphabet FROM (byte_val % 32) + 1 FOR 1) || result;
         carry := byte_val / 32;
