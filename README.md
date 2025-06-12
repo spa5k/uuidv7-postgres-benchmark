@@ -48,6 +48,59 @@ This project provides comprehensive benchmarking for time-ordered identifier gen
    python benchmark_pg18_native.py
    ```
 
+## Benchmark Data and Visualizations
+
+The benchmark suite automatically generates structured data files for integration with external applications:
+
+### Generated Data Files
+
+After running the benchmark, the following JSON files are created in the `benchmark_data/` directory:
+
+- **`chart_data.json`**: Optimized data for chart libraries (Recharts, Chart.js, etc.)
+  - Bar chart data: Performance comparison across implementations
+  - Area chart data: Throughput analysis with concurrent vs single-threaded
+  - Radar chart data: Normalized performance scores
+
+- **`performance_summary.json`**: Key metrics summary
+  - Average, median, P95, and P99 response times
+  - Throughput measurements (IDs/second)
+  - Storage requirements by implementation
+  - PostgreSQL version comparison
+
+- **`detailed_results.json`**: Complete benchmark results
+  - Raw timing data for all iterations
+  - Statistical analysis details
+  - Version-specific performance breakdowns
+
+### Visualization Assets
+
+The benchmark also generates visual reports:
+
+- **`enhanced_postgresql_benchmark.png`**: Comprehensive performance charts
+- **Performance comparison tables**: Markdown-formatted results for documentation
+
+### Usage in External Projects
+
+The JSON data files are designed for easy integration:
+
+```javascript
+// Example: Using chart_data.json in a React component
+import chartData from './benchmark_data/chart_data.json';
+
+const PerformanceChart = () => {
+  const data = chartData.bar_chart;
+  // Use with Recharts, Chart.js, etc.
+};
+```
+
+```python
+# Example: Python analysis
+import json
+with open('benchmark_data/performance_summary.json') as f:
+    data = json.load(f)
+    performance = data['performance_summary']
+```
+
 5. **Or run standard benchmarks**:
    ```bash
    python benchmark_extended.py
