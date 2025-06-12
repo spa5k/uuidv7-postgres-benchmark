@@ -1,0 +1,173 @@
+{
+  "metadata": {
+    "timestamp": "2025-06-12T17:39:13.361204",
+    "iterations": 5000,
+    "concurrent_workers": 5,
+    "concurrent_iterations": 500,
+    "functions_tested": [
+      "uuid_generate_v7",
+      "uuidv7",
+      "uuidv7_sub_ms",
+      "ulid_generate",
+      "typeid_generate_text"
+    ]
+  },
+  "benchmarks": {
+    "single_thread": [
+      {
+        "function": "uuid_generate_v7",
+        "iterations": 5000,
+        "avg_ns": 77149.4316,
+        "min_ns": 45208,
+        "max_ns": 901333,
+        "median_ns": 74625.0,
+        "std_dev_ns": 18957.293227215272,
+        "p95_ns": 99000.0,
+        "p99_ns": 119464.82000000012,
+        "avg_storage_bytes": 36
+      },
+      {
+        "function": "uuidv7",
+        "iterations": 5000,
+        "avg_ns": 84978.4634,
+        "min_ns": 51542,
+        "max_ns": 1388000,
+        "median_ns": 84584.0,
+        "std_dev_ns": 22689.91458830697,
+        "p95_ns": 104667.0,
+        "p99_ns": 114291.01,
+        "avg_storage_bytes": 36
+      },
+      {
+        "function": "uuidv7_sub_ms",
+        "iterations": 5000,
+        "avg_ns": 94685.0358,
+        "min_ns": 74500,
+        "max_ns": 189500,
+        "median_ns": 91417.0,
+        "std_dev_ns": 10801.2107655447,
+        "p95_ns": 115667.0,
+        "p99_ns": 124963.42000000011,
+        "avg_storage_bytes": 36
+      },
+      {
+        "function": "ulid_generate",
+        "iterations": 5000,
+        "avg_ns": 72308.466,
+        "min_ns": 50750,
+        "max_ns": 452167,
+        "median_ns": 69250.0,
+        "std_dev_ns": 12470.306340041807,
+        "p95_ns": 89836.05,
+        "p99_ns": 99543.25000000003,
+        "avg_storage_bytes": 26
+      },
+      {
+        "function": "typeid_generate_text",
+        "iterations": 5000,
+        "avg_ns": 72802.847,
+        "min_ns": 49209,
+        "max_ns": 247625,
+        "median_ns": 71916.0,
+        "std_dev_ns": 7778.703625592761,
+        "p95_ns": 82879.15000000001,
+        "p99_ns": 93084.41,
+        "avg_storage_bytes": 31
+      }
+    ],
+    "concurrent": [
+      {
+        "function": "uuid_generate_v7",
+        "workers": 5,
+        "total_iterations": 2500,
+        "total_time_sec": 0.08836698532104492,
+        "throughput_per_sec": 28291.108844748785,
+        "avg_ns": 139793.8808,
+        "median_ns": 133500.0,
+        "p95_ns": 203425.29999999996,
+        "p99_ns": 254627.07999999996
+      },
+      {
+        "function": "uuidv7",
+        "workers": 5,
+        "total_iterations": 2500,
+        "total_time_sec": 0.09131002426147461,
+        "throughput_per_sec": 27379.25019974829,
+        "avg_ns": 160513.7284,
+        "median_ns": 152292.0,
+        "p95_ns": 237131.24999999997,
+        "p99_ns": 315219.33999999875
+      },
+      {
+        "function": "uuidv7_sub_ms",
+        "workers": 5,
+        "total_iterations": 2500,
+        "total_time_sec": 0.10640621185302734,
+        "throughput_per_sec": 23494.868922249607,
+        "avg_ns": 184377.5416,
+        "median_ns": 173979.0,
+        "p95_ns": 287837.19999999995,
+        "p99_ns": 376848.41999999963
+      },
+      {
+        "function": "ulid_generate",
+        "workers": 5,
+        "total_iterations": 2500,
+        "total_time_sec": 0.09046602249145508,
+        "throughput_per_sec": 27634.684615830614,
+        "avg_ns": 155738.4248,
+        "median_ns": 147646.0,
+        "p95_ns": 229218.74999999948,
+        "p99_ns": 293841.06999999983
+      },
+      {
+        "function": "typeid_generate_text",
+        "workers": 5,
+        "total_iterations": 2500,
+        "total_time_sec": 0.09339189529418945,
+        "throughput_per_sec": 26768.91813925466,
+        "avg_ns": 163147.4108,
+        "median_ns": 156062.0,
+        "p95_ns": 242504.14999999997,
+        "p99_ns": 312267.0799999996
+      }
+    ],
+    "uniqueness": [
+      {
+        "function": "uuid_generate_v7",
+        "total_generated": 50000,
+        "unique_count": 50000,
+        "collision_count": 0,
+        "collision_rate": 0.0
+      },
+      {
+        "function": "uuidv7",
+        "total_generated": 50000,
+        "unique_count": 50000,
+        "collision_count": 0,
+        "collision_rate": 0.0
+      },
+      {
+        "function": "uuidv7_sub_ms",
+        "total_generated": 50000,
+        "unique_count": 50000,
+        "collision_count": 0,
+        "collision_rate": 0.0
+      },
+      {
+        "function": "ulid_generate",
+        "total_generated": 50000,
+        "unique_count": 50000,
+        "collision_count": 0,
+        "collision_rate": 0.0
+      },
+      {
+        "function": "typeid_generate_text",
+        "total_generated": 50000,
+        "unique_count": 50000,
+        "collision_count": 0,
+        "collision_rate": 0.0
+      }
+    ]
+  }
+}

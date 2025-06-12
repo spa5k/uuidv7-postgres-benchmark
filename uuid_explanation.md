@@ -58,12 +58,13 @@ $$
 7. **Convert to hex**: Final UUID in standard format
 
 ### Visual representation:
+
 ```
 Original UUIDv4:  [RRRRRRRR-RRRR-4RRR-VRRR-RRRRRRRRRRRR]
                    ^^^^^^^^^ ^^^^ ^^^^ ^^^^ ^^^^^^^^^^^^
-                   
+
 After overlay:    [TTTTTTTT-TTTT-4RRR-VRRR-RRRRRRRRRRRR]
-                   ^^^^^^^^^ ^^^^ 
+                   ^^^^^^^^^ ^^^^
                    timestamp
 
 After version:    [TTTTTTTT-TTTT-7RRR-VRRR-RRRRRRRRRRRR]
@@ -87,6 +88,7 @@ SELECT encode(
 ```
 
 The main differences:
+
 - Pure SQL implementation (no PL/pgSQL wrapper)
 - Slightly more compact syntax
 - May have marginally different performance characteristics
@@ -109,6 +111,7 @@ FROM (SELECT extract(epoch from clock_timestamp())*1000 as t_ms) s
 3. **Bit manipulation for version**: `(7<<12)` shifts version bits into position
 
 ### Breakdown:
+
 ```
 Part 1: 6 bytes timestamp (48 bits)
 Part 2: 2 bytes containing:
@@ -122,30 +125,34 @@ Result: [TIMESTAMP_MS][VER+SUBSEC][RANDOM_DATA]
 ## Performance Characteristics
 
 ### Function 1 & 2 (overlay method):
-- **Pros**: 
+
+- **Pros**:
   - Reuses existing UUID generation
   - Simple bit manipulation
   - Good performance
-- **Cons**: 
+- **Cons**:
   - No sub-millisecond precision
   - Slightly more operations
 
 ### Function 3 (construction method):
-- **Pros**: 
+
+- **Pros**:
   - Sub-millisecond precision
   - Direct construction
   - Better time ordering within same millisecond
-- **Cons**: 
+- **Cons**:
   - More complex logic
   - Potentially slower due to multiple concatenations
 
 ## Collision Analysis
 
 All functions use sufficient randomness:
+
 - Functions 1 & 2: 74 bits of randomness (12 + 62)
 - Function 3: 62 bits of randomness
 
 Probability of collision within same millisecond:
+
 - Functions 1 & 2: ~1 in 2^74 ≈ 1 in 10^22
 - Function 3: ~1 in 2^62 ≈ 1 in 10^18
 
@@ -154,7 +161,7 @@ Even generating 1 billion UUIDs per millisecond, collisions remain astronomicall
 ## Time Ordering Guarantees
 
 - **Between milliseconds**: All functions guarantee ordering
-- **Within millisecond**: 
+- **Within millisecond**:
   - Functions 1 & 2: Random ordering
   - Function 3: Sub-millisecond ordering (better granularity)
 
