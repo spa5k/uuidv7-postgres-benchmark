@@ -23,6 +23,7 @@ help:
 	@echo ""
 	@echo "Utility Commands:"
 	@echo "  make test             - Test database connections and functions"
+	@echo "  make generate-graphs  - Generate performance charts for README"
 	@echo "  make logs             - Show PostgreSQL container logs"
 	@echo "  make clean            - Clean up containers, volumes, and results"
 	@echo ""
@@ -68,6 +69,11 @@ test:
 	@venv/bin/python test_dependencies.py
 	@echo "Testing database connections..."
 	@./run_professional_benchmark.sh quick 2>/dev/null | grep -E "(✅|❌|Testing)" || echo "Run 'make up' first"
+
+generate-graphs:
+	@echo "Generating performance charts for README..."
+	@venv/bin/python generate_readme_graphs.py
+	@echo "✅ Charts generated and README updated"
 
 benchmark:
 	@echo "Running standard professional benchmark..."

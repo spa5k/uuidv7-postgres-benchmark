@@ -138,3 +138,26 @@ make clean      # Reset everything
 ---
 
 For detailed analysis and implementation details, see the [blog post](https://www.saybackend.com/blog/uuidv7-postgres-comparison).
+
+## 📊 Performance Charts
+
+### Overall Performance Comparison
+![Performance Comparison](docs/images/performance_comparison.png)
+
+*Native PostgreSQL 18 UUIDv7 shows 33% better performance than custom PG17 implementation*
+
+### Response Time Distribution
+![Percentile Comparison](docs/images/percentile_comparison.png)
+
+*Detailed latency distribution showing P50, P95, and P99 response times*
+
+### PostgreSQL Version Comparison
+![Version Comparison](docs/images/postgresql_version_comparison.png)
+
+*Direct comparison between PostgreSQL 17 custom implementation and PostgreSQL 18 native UUIDv7*
+
+### Comprehensive Analysis
+![Comprehensive Overview](docs/images/comprehensive_overview.png)
+
+*Complete performance analysis including throughput ranking, storage efficiency, and latency distribution*
+
