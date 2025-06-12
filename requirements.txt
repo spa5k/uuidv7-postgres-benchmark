@@ -1,5 +1,21 @@
-psycopg2-binary==2.9.9
+# Professional PostgreSQL UUIDv7 Benchmark Suite Requirements
+# Updated for consistency and modern PostgreSQL support
+
+# Database connectivity (using psycopg 3 for PostgreSQL 14+ support)
+psycopg[binary]==3.1.13
+psycopg2-binary==2.9.9  # Fallback compatibility
+
+# Data analysis and visualization
 matplotlib==3.8.2
+seaborn==0.13.0
 pandas==2.1.4
 numpy==1.26.2
-seaborn==0.13.0
+
+# Statistical analysis
+scipy==1.11.4
+
+# Performance monitoring
+memory-profiler==0.61.0
+
+# Data export formats
+openpyxl==3.1.2  # Excel export support
