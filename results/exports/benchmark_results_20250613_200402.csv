@@ -1,0 +1,3 @@
+database,function,postgres_version,runs_completed,avg_single_thread_ns,avg_single_thread_us,median_single_thread_ns,p95_single_thread_ns,p99_single_thread_ns,avg_throughput_per_second,std_dev_throughput,coefficient_of_variation,run_to_run_variance
+postgresql17,uuid_generate_v7,17,10,75869.670109,75.869670109,75062.5,78467.81173449999,78508.3754509,19463.659260248354,1183.0091380179438,0.05033702828576526,14585171.394982597
+postgresql18,uuid_generate_v7,18,10,75819.572549,75.819572549,75000.0,77173.196588,77452.8110216,20129.628775440855,391.23532812667,0.009961793489646702,570476.4649073813
