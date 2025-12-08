@@ -38,6 +38,7 @@ make benchmark  # Run comprehensive benchmark
 Professional-grade benchmarking ensures statistical significance and real-world accuracy:
 
 ### High-Precision Testing
+
 - **Warmup**: 10,000 iterations per function to eliminate cold-start effects
 - **Measurement**: 50,000 iterations for statistical significance (quick mode: 5,000)
 - **Runs**: 5 complete benchmark cycles per function for consistency analysis
@@ -45,6 +46,7 @@ Professional-grade benchmarking ensures statistical significance and real-world 
 - **Concurrency**: 10 workers × 5,000 iterations for realistic load testing
 
 ### Statistical Analysis
+
 - **Percentiles**: P50, P95, P99 latency distribution analysis
 - **Consistency**: Coefficient of variation across multiple runs
 - **Outlier detection**: 3-sigma threshold for data quality
@@ -89,7 +91,7 @@ make benchmark-extensive    # 100K iterations, 10 runs, ~45-60 minutes
 ## Requirements
 
 - **Docker & Docker Compose** - Container management
-- **Python 3.8+** - Benchmark execution (managed with UV)
+- **Python 3.14+** - Benchmark execution (managed with UV)
 - **6GB+ RAM** - PostgreSQL optimization (2GB × 2 instances + overhead)
 - **UV Package Manager** - Fast Python dependency resolution (auto-installed)
 
@@ -107,7 +109,7 @@ Results are generated in multiple formats:
 ## Container Configuration
 
 - **PostgreSQL 17**: Port 5434, optimized for benchmarking
-- **PostgreSQL 18**: Port 5435, native UUIDv7 + optimizations  
+- **PostgreSQL 18**: Port 5435, native UUIDv7 + optimizations
 - **Database**: `benchmark` with consistent schemas
 - **Performance tuning**: 256MB shared buffers, 1GB effective cache, SSD optimizations
 - **Resource limits**: 2GB RAM, 2 CPU cores per container
@@ -143,7 +145,7 @@ SELECT uuid_extract_timestamp(id) FROM users;
 ```bash
 make install           # Setup Python environment with UV
 make up               # Start PostgreSQL containers
-make down             # Stop containers  
+make down             # Stop containers
 make status           # Check container health
 make test             # Validate database connections
 make generate-graphs  # Create performance charts for README
@@ -154,18 +156,21 @@ make clean            # Reset everything (containers + results)
 ## Technical Implementation
 
 ### Benchmark Engine
-- **Language**: Python 3.8+ with psycopg3 for optimal PostgreSQL performance  
+
+- **Language**: Python 3.14+ with psycopg3 for optimal PostgreSQL performance
 - **Timing**: Nanosecond precision using `time.perf_counter_ns()`
 - **Concurrency**: 10 workers × 5,000 iterations for realistic load testing
 - **Validation**: Function correctness testing before benchmarking
 
 ### Database Optimization
+
 - **Connection tuning**: Optimized timeouts and pooling for consistent measurements
 - **Query optimization**: Direct function calls without SQL parsing overhead
 - **Memory management**: Controlled allocation and cleanup between runs
 - **Transaction isolation**: READ COMMITTED with consistent measurement environment
 
 ### Statistical Analysis
+
 - **Methodology**: 50K iterations, 5 runs, 10K warmup for statistical significance
 - **Precision**: Nanosecond timing accuracy with outlier detection
 - **Metrics**: Mean, median, P50/P95/P99 latencies, coefficient of variation
@@ -178,22 +183,25 @@ For detailed analysis and implementation details, see the [blog post](https://ww
 ## 📊 Performance Charts
 
 ### Overall Performance Comparison
+
 ![Performance Comparison](docs/images/performance_comparison.png)
 
-*Native PostgreSQL 18 UUIDv7 shows 33% better performance than custom PG17 implementation*
+_Native PostgreSQL 18 UUIDv7 shows 33% better performance than custom PG17 implementation_
 
 ### Response Time Distribution
+
 ![Percentile Comparison](docs/images/percentile_comparison.png)
 
-*Detailed latency distribution showing P50, P95, and P99 response times*
+_Detailed latency distribution showing P50, P95, and P99 response times_
 
 ### PostgreSQL Version Comparison
+
 ![Version Comparison](docs/images/postgresql_version_comparison.png)
 
-*Direct comparison between PostgreSQL 17 custom implementation and PostgreSQL 18 native UUIDv7*
+_Direct comparison between PostgreSQL 17 custom implementation and PostgreSQL 18 native UUIDv7_
 
 ### Comprehensive Analysis
+
 ![Comprehensive Overview](docs/images/comprehensive_overview.png)
 
-*Complete performance analysis including throughput ranking, storage efficiency, and latency distribution*
-
+_Complete performance analysis including throughput ranking, storage efficiency, and latency distribution_

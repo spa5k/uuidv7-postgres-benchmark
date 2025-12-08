@@ -6,12 +6,13 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: benchmark
+      PGDATA: /var/lib/postgresql/data
       # Performance tuning for consistent benchmarks
       POSTGRES_INITDB_ARGS: "--data-checksums"
     ports:
       - "5434:5432"
     volumes:
-      - postgres17_data:/var/lib/postgresql/data
+      - postgres17_data:/var/lib/postgresql
       - ./init:/docker-entrypoint-initdb.d
       - ./postgresql.conf:/etc/postgresql/postgresql.conf
     command: >
@@ -45,18 +46,19 @@ services:
       retries: 10
 
   postgres18:
-    image: postgres:18beta1
+    image: postgres:18
     container_name: postgres18-uuidv7
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: benchmark
+      PGDATA: /var/lib/postgresql/data
       # Performance tuning for consistent benchmarks
       POSTGRES_INITDB_ARGS: "--data-checksums"
     ports:
       - "5435:5432"
     volumes:
-      - postgres18_data:/var/lib/postgresql/data
+      - postgres18_data:/var/lib/postgresql
       - ./init:/docker-entrypoint-initdb.d
       - ./postgresql.conf:/etc/postgresql/postgresql.conf
     command: >

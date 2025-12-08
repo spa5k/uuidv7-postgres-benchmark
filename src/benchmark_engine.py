@@ -96,7 +96,7 @@ class BenchmarkEngine:
 
     def __init__(self, config: BenchmarkConfig = DEFAULT_BENCHMARK_CONFIG):
         self.config = config
-        self.db_manager = DatabaseManager()
+        self.db_manager = DatabaseManager(config)
         self.results: Dict[str, List[BenchmarkResult]] = {}
         self.aggregated_results: Dict[str, AggregatedResults] = {}
 
@@ -117,16 +117,20 @@ class BenchmarkEngine:
         db_info = self.db_manager.initialize_all_databases()
 
         # Run benchmarks for each database
-        for db_name, config in db_configs.items():
+        ordered_db_names = sorted(db_configs.keys())
+        logger.info(f"Sequential execution order: {', '.join(ordered_db_names)}")
+
+        for db_name in ordered_db_names:
+            config = db_configs[db_name]
             if db_name not in db_info:
                 logger.error(f"Database {db_name} not initialized, skipping...")
                 continue
 
-            logger.info(f"\n{'='*60}")
+            logger.info(f"\n{'=' * 60}")
             logger.info(
                 f"Benchmarking {db_name} (PostgreSQL {db_info[db_name].major_version})"
             )
-            logger.info(f"{'='*60}")
+            logger.info(f"{'=' * 60}")
 
             # Optimize database for benchmarking
             self.db_manager.optimize_for_benchmarking(db_name)
@@ -138,7 +142,7 @@ class BenchmarkEngine:
             )
 
             # Run benchmarks for all supported functions
-            for func_name in db_info[db_name].supported_functions:
+            for func_name in sorted(db_info[db_name].supported_functions):
                 self._run_function_benchmark(
                     db_name, config, func_name, db_info[db_name]
                 )
@@ -176,7 +180,7 @@ class BenchmarkEngine:
 
                 # Log run summary
                 logger.info(
-                    f"    Single-thread: {result.single_thread_avg_ns/1000:.1f}μs avg"
+                    f"    Single-thread: {result.single_thread_avg_ns / 1000:.1f}μs avg"
                 )
                 logger.info(
                     f"    Concurrent: {result.concurrent_throughput_per_second:,.0f} ops/sec"
@@ -296,7 +300,7 @@ class BenchmarkEngine:
 
             # Progress logging every 10k iterations
             if (i + 1) % 10000 == 0:
-                logger.debug(f"      Progress: {i+1:,}/{iterations:,}")
+                logger.debug(f"      Progress: {i + 1:,}/{iterations:,}")
 
         # Calculate statistics
         return {
@@ -319,7 +323,18 @@ class BenchmarkEngine:
     ) -> Dict[str, Any]:
         """Execute concurrent benchmark with multiple workers"""
         all_times_ns = []
-        start_time = time.perf_counter()
+
+        def warmup_worker(_: int):
+            """Warm up the database function without recording times"""
+            if self.config.concurrent_warmup_iterations <= 0:
+                return
+            with self.db_manager.get_connection(config) as conn:
+                with conn.cursor() as cur:
+                    for _ in range(self.config.concurrent_warmup_iterations):
+                        if "typeid" in func_name:
+                            cur.execute(f"SELECT {func_name}('test')")
+                        else:
+                            cur.execute(f"SELECT {func_name}()")
 
         def worker_function(worker_id: int) -> List[int]:
             """Worker function for concurrent benchmarking"""
@@ -327,23 +342,29 @@ class BenchmarkEngine:
 
             with self.db_manager.get_connection(config) as conn:
                 with conn.cursor() as cur:
+                    # Timed iterations
                     for i in range(iterations_per_worker):
                         if "typeid" in func_name:
                             t_start = time.perf_counter_ns()
                             cur.execute(f"SELECT {func_name}('test')")
-                            result = cur.fetchone()
+                            _ = cur.fetchone()
                             t_end = time.perf_counter_ns()
                         else:
                             t_start = time.perf_counter_ns()
                             cur.execute(f"SELECT {func_name}()")
-                            result = cur.fetchone()
+                            _ = cur.fetchone()
                             t_end = time.perf_counter_ns()
 
                         worker_times.append(t_end - t_start)
 
             return worker_times
 
-        # Execute concurrent workers
+        # Concurrent warmup (not timed)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
+            executor.map(warmup_worker, range(workers))
+
+        # Timed execution
+        start_time = time.perf_counter()
         with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
             futures = [executor.submit(worker_function, i) for i in range(workers)]
 
@@ -359,32 +380,50 @@ class BenchmarkEngine:
             "times_ns": all_times_ns,
             "avg_ns": statistics.mean(all_times_ns),
             "median_ns": statistics.median(all_times_ns),
-            "std_dev_ns": statistics.stdev(all_times_ns)
-            if len(all_times_ns) > 1
-            else 0,
+            "std_dev_ns": (
+                statistics.stdev(all_times_ns) if len(all_times_ns) > 1 else 0
+            ),
             "throughput_per_second": throughput_per_second,
             "total_time_s": total_time_s,
         }
 
     def _validate_function_output(self, cursor, func_name: str) -> Dict[str, Any]:
         """Validate function output for correctness"""
-        test_ids = []
+        func_config = FUNCTION_CONFIGS[func_name]
 
-        # Generate test IDs
-        for _ in range(100):
+        # Gather samples for format and ordering checks
+        sample_ids = []
+        for _ in range(self.config.validation_sample_size):
             if "typeid" in func_name:
                 cursor.execute(f"SELECT {func_name}('test')")
             else:
                 cursor.execute(f"SELECT {func_name}()")
-            test_ids.append(cursor.fetchone()[0])
+            sample_ids.append(cursor.fetchone()[0])
 
-        # Check uniqueness
-        unique_ids = set(str(id) for id in test_ids)
-        all_unique = len(unique_ids) == len(test_ids)
+        # Collision / uniqueness test at scale
+        collision_set = set()
+        all_unique = True
+        for _ in range(self.config.collision_test_iterations):
+            if "typeid" in func_name:
+                cursor.execute(f"SELECT {func_name}('test')")
+            else:
+                cursor.execute(f"SELECT {func_name}()")
+            val = cursor.fetchone()[0]
+            key = str(val)
+            if key in collision_set:
+                all_unique = False
+                break
+            collision_set.add(key)
 
-        # Check format (basic validation)
-        sample_id = str(test_ids[0])
-        func_config = FUNCTION_CONFIGS[func_name]
+        sample_id = str(sample_ids[0])
+        correct_format = self.db_manager._validate_id_format(sample_ids[0], func_config)
+
+        # Time-ordering check uses gathered samples
+        time_ordered = (
+            self.db_manager._validate_time_ordering(sample_ids, func_config)
+            if func_config.get("time_ordered")
+            else None
+        )
 
         # Estimate storage size
         if func_config["storage_type"] == "binary":
@@ -394,7 +433,8 @@ class BenchmarkEngine:
 
         return {
             "all_unique": all_unique,
-            "correct_format": True,  # Simplified for now
+            "correct_format": correct_format,
+            "time_ordered": time_ordered,
             "sample_id": sample_id,
             "storage_size": storage_size,
         }
@@ -453,9 +493,11 @@ class BenchmarkEngine:
                     postgres_version=func_results[0].postgres_version,
                     # Single-threaded aggregation
                     avg_single_thread_ns=statistics.mean(all_single_avgs),
-                    std_dev_single_thread_ns=statistics.stdev(all_single_avgs)
-                    if len(all_single_avgs) > 1
-                    else 0,
+                    std_dev_single_thread_ns=(
+                        statistics.stdev(all_single_avgs)
+                        if len(all_single_avgs) > 1
+                        else 0
+                    ),
                     median_single_thread_ns=statistics.median(all_single_medians),
                     min_single_thread_ns=min(all_single_avgs),
                     max_single_thread_ns=max(all_single_avgs),
@@ -464,14 +506,18 @@ class BenchmarkEngine:
                     # Concurrent aggregation
                     avg_concurrent_ns=statistics.mean(all_concurrent_avgs),
                     avg_throughput_per_second=statistics.mean(all_throughputs),
-                    std_dev_throughput=statistics.stdev(all_throughputs)
-                    if len(all_throughputs) > 1
-                    else 0,
+                    std_dev_throughput=(
+                        statistics.stdev(all_throughputs)
+                        if len(all_throughputs) > 1
+                        else 0
+                    ),
                     # Consistency metrics
                     coefficient_of_variation=cv,
-                    run_to_run_variance=statistics.variance(all_single_avgs)
-                    if len(all_single_avgs) > 1
-                    else 0,
+                    run_to_run_variance=(
+                        statistics.variance(all_single_avgs)
+                        if len(all_single_avgs) > 1
+                        else 0
+                    ),
                 )
 
                 key = f"{db_name}_{func_name}"

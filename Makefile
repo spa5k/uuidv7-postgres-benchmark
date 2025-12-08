@@ -36,8 +36,7 @@ help:
 install:
 	@echo "Installing Python dependencies with UV..."
 	@command -v uv >/dev/null 2>&1 || { echo "❌ UV not found. Install with: curl -LsSf https://astral.sh/uv/install.sh | sh"; exit 1; }
-	uv venv venv --python 3.8
-	uv pip install --python venv/bin/python -r requirements.txt
+	UV_PYTHON=3.14 uv sync
 	@echo "✅ Python environment ready"
 
 setup: install up
@@ -66,13 +65,13 @@ status:
 
 test:
 	@echo "Testing Python dependencies..."
-	@venv/bin/python test_dependencies.py
+	@uv run python test_dependencies.py
 	@echo "Testing database connections..."
 	@./run_professional_benchmark.sh quick 2>/dev/null | grep -E "(✅|❌|Testing)" || echo "Run 'make up' first"
 
 generate-graphs:
 	@echo "Generating performance charts for README..."
-	@venv/bin/python generate_readme_graphs.py
+	@uv run python generate_readme_graphs.py
 	@echo "✅ Charts generated and README updated"
 
 benchmark:
@@ -111,12 +110,16 @@ clean:
 .PHONY: dev-install dev-test dev-profile
 
 dev-install: install
-	@command -v uv >/dev/null 2>&1 && uv pip install --python venv/bin/python pytest pytest-benchmark black flake8 mypy || ./venv/bin/pip install pytest pytest-benchmark black flake8 mypy
+	@command -v uv >/dev/null 2>&1 && UV_PYTHON=3.14 uv sync --extra dev || { echo "❌ UV not found. Install with: curl -LsSf https://astral.sh/uv/install.sh | sh"; exit 1; }
 
 dev-test:
 	@echo "Running development tests..."
-	./venv/bin/python -m pytest tests/ -v
+	uv run python -m pytest tests/ -v
 
 dev-profile:
 	@echo "Running benchmark with profiling..."
-	./venv/bin/python -m memory_profiler professional_benchmark.py --quick
+	uv run python -m memory_profiler professional_benchmark.py --quick
+
+fmt:
+	@echo "Formatting code..."
+	uvx ruff format

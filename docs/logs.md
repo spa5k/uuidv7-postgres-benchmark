@@ -2,7 +2,7 @@
 
 **Analysis Date:** 2025-06-12\
 **Analysis Type:** Blog Post Data Integrity Review + Real Benchmark Execution\
-**Environment:** Docker containers with PostgreSQL 17 and 18beta1
+**Environment:** Docker containers with PostgreSQL 17 and 18
 
 ## Executive Summary
 
@@ -13,12 +13,14 @@ Comprehensive review of the UUIDv7 PostgreSQL blog post revealed significant dat
 ### 🚨 **Critical Data Inconsistencies**
 
 1. **Performance Data Mismatches**:
+
    - **Blog claimed**: uuid_generate_v7() = 72.3 μs
    - **Actual benchmark**: uuid_generate_v7() = 77.15 μs (SIMPLIFIED) vs 72.3 μs (ENHANCED)
    - **Blog claimed**: UUIDv4 = 86.3 μs
    - **Actual benchmark**: UUIDv4 = 86.3 μs (ENHANCED) vs missing from SIMPLIFIED
 
 2. **Concurrent Throughput Inconsistencies**:
+
    - **Blog claimed**: Native uuidv7() = 34,127 IDs/sec
    - **Blog claimed**: uuid_generate_v7() = 18,126 IDs/sec
    - **Actual benchmark**: uuid_generate_v7() = 28,291 IDs/sec (MAJOR DISCREPANCY)
@@ -58,7 +60,7 @@ services:
       -c max_connections=200
 
   postgres18:
-    image: postgres:18beta1
+    image: postgres:18
     # Same resource configuration
 ```
 
@@ -97,7 +99,7 @@ SELECT uuidv7() FROM generate_series(1,1000);
 Time: 1.157 ms
 Per operation: 1.16 μs
 
--- UUIDv4 (PostgreSQL 18)  
+-- UUIDv4 (PostgreSQL 18)
 SELECT gen_random_uuid() FROM generate_series(1,1000);
 Time: 1.185 ms
 Per operation: 1.19 μs
@@ -144,12 +146,14 @@ Per operation: 3.33 μs
 ### Blog Post Corrections Made
 
 1. **Updated TL;DR Section**:
+
    ```markdown
    OLD: PostgreSQL 18's native uuidv7() outperforms all alternatives with 58.1 μs generation time
    NEW: PostgreSQL 18's native uuidv7() is marginally faster than UUIDv4 (1.16 vs 1.19 μs per operation)
    ```
 
 2. **Corrected Performance Tables**:
+
    - Replaced inconsistent benchmark data with real measurements
    - Added direct PostgreSQL timing results
    - Removed unverified concurrent throughput claims

@@ -51,7 +51,7 @@ def setup_logging(verbose: bool = False):
 
     # File handler
     log_file = (
-        Path("results") / "logs" / f'benchmark_{time.strftime("%Y%m%d_%H%M%S")}.log'
+        Path("results") / "logs" / f"benchmark_{time.strftime('%Y%m%d_%H%M%S')}.log"
     )
     log_file.parent.mkdir(parents=True, exist_ok=True)
 
@@ -97,7 +97,7 @@ def validate_environment():
         return False
 
     # Check if Docker containers are running
-    db_manager = DatabaseManager()
+    db_manager = DatabaseManager(DEFAULT_BENCHMARK_CONFIG)
 
     for db_name, config in DATABASE_CONFIGS.items():
         try:

@@ -1,3 +1,6 @@
+-- Required extensions
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 -- UUIDv7 Function 1: Simple implementation using overlay and bit manipulation
 CREATE OR REPLACE FUNCTION uuid_generate_v7()
 RETURNS uuid
@@ -38,6 +41,13 @@ AS $$
           from 1 for 6),
         52, 1),
       53, 1), 'hex')::uuid;
+$$ LANGUAGE sql VOLATILE;
+
+-- Alias for compatibility with benchmark configuration
+CREATE OR REPLACE FUNCTION uuidv7_custom()
+RETURNS uuid
+AS $$
+  SELECT uuidv7();
 $$ LANGUAGE sql VOLATILE;
 
 -- UUIDv7 Function 3: Sub-millisecond precision version

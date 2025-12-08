@@ -3,7 +3,7 @@
 # Professional PostgreSQL UUIDv7 Benchmark Suite Runner
 # Automated setup and execution with comprehensive error handling
 
-set -e
+set -euo pipefail
 
 # Color codes for output
 RED='\033[0;31m'
@@ -15,7 +15,8 @@ NC='\033[0m' # No Color
 
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-LOG_DIR="$SCRIPT_DIR/results/logs"
+RESULTS_DIR="$SCRIPT_DIR/results"
+LOG_DIR="$RESULTS_DIR/logs"
 TIMESTAMP=$(date '+%Y%m%d_%H%M%S')
 
 # Create log directory
@@ -83,17 +84,36 @@ check_dependencies() {
         exit 1
     fi
     
-    # Check Python version (minimum 3.8)
+    # Check Python version (minimum 3.14)
     python_version=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
     python_major=$(echo $python_version | cut -d. -f1)
     python_minor=$(echo $python_version | cut -d. -f2)
     
-    if [ "$python_major" -lt 3 ] || ([ "$python_major" -eq 3 ] && [ "$python_minor" -lt 8 ]); then
-        error "Python 3.8+ required, found Python $python_version"
+    if [ "$python_major" -lt 3 ] || ([ "$python_major" -eq 3 ] && [ "$python_minor" -lt 14 ]); then
+        error "Python 3.14+ required, found Python $python_version"
         exit 1
     fi
     
     success "All dependencies are available"
+}
+
+clean_previous_results() {
+    log "Cleaning previous benchmark data..."
+    cd "$SCRIPT_DIR"
+
+    mkdir -p "$RESULTS_DIR" "$LOG_DIR"
+
+    if [ -d "$RESULTS_DIR" ]; then
+        find "$RESULTS_DIR" -mindepth 1 -maxdepth 1 ! -name "logs" -exec rm -rf {} \;
+    fi
+
+    find "$SCRIPT_DIR" -maxdepth 1 -type f -name "benchmark_results_*.json" -delete
+    find "$SCRIPT_DIR" -maxdepth 1 -type f -name "benchmark_report_*.md" -delete
+    find "$SCRIPT_DIR" -maxdepth 1 -type f -name "chart_data_*.json" -delete
+    find "$SCRIPT_DIR" -maxdepth 1 -type f -name "performance_summary_*.json" -delete
+    find "$SCRIPT_DIR" -maxdepth 1 -type f -name "comprehensive_benchmark_analysis_*.png" -delete
+
+    success "Old benchmark data cleaned"
 }
 
 setup_python_environment() {
@@ -104,16 +124,7 @@ setup_python_environment() {
     # Check if UV is available
     if command -v uv &> /dev/null; then
         log "Using UV for Python environment management..."
-        
-        # Create virtual environment with UV if it doesn't exist
-        if [ ! -d "venv" ]; then
-            log "Creating Python virtual environment with UV..."
-            uv venv venv --python 3.8
-        fi
-        
-        # Install requirements with UV
-        log "Installing Python requirements with UV..."
-        uv pip install --python venv/bin/python -r requirements.txt > /dev/null 2>&1 || {
+        UV_PYTHON=3.14 uv sync || {
             error "Failed to install Python requirements with UV"
             exit 1
         }
@@ -121,13 +132,13 @@ setup_python_environment() {
         log "UV not found, falling back to pip..."
         
         # Create virtual environment if it doesn't exist
-        if [ ! -d "venv" ]; then
+        if [ ! -d ".venv" ]; then
             log "Creating Python virtual environment..."
-            python3 -m venv venv
+            python3 -m venv .venv
         fi
         
         # Activate virtual environment
-        source venv/bin/activate || {
+        source .venv/bin/activate || {
             error "Failed to activate virtual environment"
             exit 1
         }
@@ -236,20 +247,16 @@ run_benchmark() {
     log "Running benchmark in $mode mode..."
     
     cd "$SCRIPT_DIR"
-    source venv/bin/activate || {
-        error "Failed to activate virtual environment for benchmark"
-        exit 1
-    }
     
     case "$mode" in
         "quick")
-            venv/bin/python professional_benchmark.py --quick --verbose
+            .venv/bin/python professional_benchmark.py --quick --verbose
             ;;
         "extensive")
-            venv/bin/python professional_benchmark.py --extensive --verbose
+            .venv/bin/python professional_benchmark.py --extensive --verbose
             ;;
         "standard"|*)
-            venv/bin/python professional_benchmark.py --verbose
+            .venv/bin/python professional_benchmark.py --verbose
             ;;
     esac
 }
@@ -301,12 +308,14 @@ main() {
     log "Starting Professional PostgreSQL UUIDv7 Benchmark Suite"
     log "Mode: $mode"
     log "Timestamp: $TIMESTAMP"
+    log "Ensuring sequential execution of benchmark steps..."
     
     # Set up trap for cleanup on exit
     trap cleanup EXIT
     
     # Main execution flow
     check_dependencies
+    clean_previous_results
     setup_python_environment
     manage_docker_containers
     verify_database_functions
@@ -325,7 +334,7 @@ main() {
     echo ""
     
     success "Benchmark completed in $duration seconds"
-    success "Results saved to: $SCRIPT_DIR/results/"
+    success "Results saved to: $RESULTS_DIR/"
     
     echo ""
     echo -e "${BOLD}📁 Generated Files:${NC}"

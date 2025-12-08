@@ -456,15 +456,15 @@ class DataExporter:
 
         report = f"""# PostgreSQL UUIDv7 Benchmark Report
         
-Generated: {metadata['benchmark_completed']}
-Total Execution Time: {metadata['total_execution_time_seconds']:.1f} seconds
+Generated: {metadata["benchmark_completed"]}
+Total Execution Time: {metadata["total_execution_time_seconds"]:.1f} seconds
 
 ## Executive Summary
 
 This comprehensive benchmark compares UUID generation performance across PostgreSQL 17 and 18,
 featuring native UUIDv7 support in PostgreSQL 18. The benchmark uses professional-grade 
-methodology with {metadata['configuration']['benchmark_runs']} runs per function and 
-{metadata['configuration']['single_thread_iterations']:,} iterations per run.
+methodology with {metadata["configuration"]["benchmark_runs"]} runs per function and 
+{metadata["configuration"]["single_thread_iterations"]:,} iterations per run.
 
 ### Key Findings
 
@@ -496,13 +496,13 @@ methodology with {metadata['configuration']['benchmark_runs']} runs per function
         report += f"""
 ### Test Configuration
 
-- **Databases Tested**: {', '.join(metadata['databases_tested'])}
-- **Functions Tested**: {', '.join(metadata['functions_tested'])}
-- **Benchmark Runs**: {metadata['configuration']['benchmark_runs']}
-- **Single-Thread Iterations**: {metadata['configuration']['single_thread_iterations']:,}
-- **Concurrent Workers**: {metadata['configuration']['concurrent_workers']}
-- **Concurrent Iterations**: {metadata['configuration']['concurrent_iterations_per_worker']:,} per worker
-- **Warmup Iterations**: {metadata['configuration']['warmup_iterations']:,}
+- **Databases Tested**: {", ".join(metadata["databases_tested"])}
+- **Functions Tested**: {", ".join(metadata["functions_tested"])}
+- **Benchmark Runs**: {metadata["configuration"]["benchmark_runs"]}
+- **Single-Thread Iterations**: {metadata["configuration"]["single_thread_iterations"]:,}
+- **Concurrent Workers**: {metadata["configuration"]["concurrent_workers"]}
+- **Concurrent Iterations**: {metadata["configuration"]["concurrent_iterations_per_worker"]:,} per worker
+- **Warmup Iterations**: {metadata["configuration"]["warmup_iterations"]:,}
 
 ## Detailed Results
 
@@ -521,9 +521,9 @@ methodology with {metadata['configuration']['benchmark_runs']} runs per function
                 f"| {result['function']} | {result['db']} | {result['pg_version']} | "
             )
             report += f"{result['avg_time_us']:.1f} | "
-            report += f"{agg_data['median_single_thread_ns']/1000:.1f} | "
-            report += f"{agg_data['p95_single_thread_ns']/1000:.1f} | "
-            report += f"{agg_data['p99_single_thread_ns']/1000:.1f} | "
+            report += f"{agg_data['median_single_thread_ns'] / 1000:.1f} | "
+            report += f"{agg_data['p95_single_thread_ns'] / 1000:.1f} | "
+            report += f"{agg_data['p99_single_thread_ns'] / 1000:.1f} | "
             report += f"{agg_data['runs_completed']} |\n"
 
         report += f"""
@@ -544,7 +544,7 @@ methodology with {metadata['configuration']['benchmark_runs']} runs per function
                 f"| {result['function']} | {result['db']} | {result['pg_version']} | "
             )
             report += f"{result['throughput']:,.0f} | "
-            report += f"{agg_data['avg_concurrent_ns']/1000:.1f} | "
+            report += f"{agg_data['avg_concurrent_ns'] / 1000:.1f} | "
             report += f"{agg_data['std_dev_throughput']:.0f} | "
             report += f"{agg_data['coefficient_of_variation']:.3f} |\n"
 
@@ -598,11 +598,11 @@ PostgreSQL 18 introduces native UUIDv7 support with significant performance impr
 
 This benchmark uses professional methodology to ensure accurate and reproducible results:
 
-1. **Warmup Phase**: {metadata['configuration']['warmup_iterations']:,} iterations to ensure stable CPU caches and database state
-2. **Multiple Runs**: Each function tested {metadata['configuration']['benchmark_runs']} times to measure consistency
+1. **Warmup Phase**: {metadata["configuration"]["warmup_iterations"]:,} iterations to ensure stable CPU caches and database state
+2. **Multiple Runs**: Each function tested {metadata["configuration"]["benchmark_runs"]} times to measure consistency
 3. **High Precision Timing**: `time.perf_counter_ns()` for nanosecond precision
 4. **Statistical Analysis**: Mean, median, standard deviation, and percentiles calculated
-5. **Concurrent Testing**: {metadata['configuration']['concurrent_workers']} workers simulate realistic load
+5. **Concurrent Testing**: {metadata["configuration"]["concurrent_workers"]} workers simulate realistic load
 
 ### Database Configuration
 

@@ -20,7 +20,7 @@ BEGIN
     -- Encode timestamp (48 bits / 6 bytes) in 10 characters
     temp_val := timestamp_ms;
     FOR i IN 1..10 LOOP
-        ulid_text := substring(alphabet FROM (temp_val % 32) + 1 FOR 1) || ulid_text;
+        ulid_text := substring(alphabet FROM ((temp_val % 32)::int) + 1 FOR 1) || ulid_text;
         temp_val := temp_val / 32;
     END LOOP;
     
@@ -30,10 +30,10 @@ BEGIN
     -- Encode random part (80 bits) in 16 characters  
     FOR i IN 0..9 LOOP
         temp_val := get_byte(random_bytes, i);
-        ulid_text := ulid_text || substring(alphabet FROM (temp_val % 32) + 1 FOR 1);
+        ulid_text := ulid_text || substring(alphabet FROM ((temp_val % 32)::int) + 1 FOR 1);
         temp_val := temp_val / 32;
         IF temp_val > 0 THEN
-            ulid_text := ulid_text || substring(alphabet FROM (temp_val % 32) + 1 FOR 1);
+            ulid_text := ulid_text || substring(alphabet FROM ((temp_val % 32)::int) + 1 FOR 1);
         ELSE
             ulid_text := ulid_text || substring(alphabet FROM 1 FOR 1);
         END IF;
@@ -70,13 +70,13 @@ BEGIN
     -- Encode all 16 bytes as base32 (26 characters)
     FOR i IN REVERSE 15..0 LOOP
         byte_val := get_byte(combined_bytes, i) + carry * 256;
-        result := substring(alphabet FROM (byte_val % 32) + 1 FOR 1) || result;
+        result := substring(alphabet FROM ((byte_val % 32) + 1)) || result;
         carry := byte_val / 32;
     END LOOP;
     
     -- Handle any remaining carry
     WHILE carry > 0 LOOP
-        result := substring(alphabet FROM (carry % 32) + 1 FOR 1) || result;
+        result := substring(alphabet FROM ((carry % 32) + 1)) || result;
         carry := carry / 32;
     END LOOP;
     

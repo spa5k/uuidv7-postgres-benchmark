@@ -38,7 +38,7 @@ Identical configuration applied to both PostgreSQL 17 and 18 beta containers:
 | Component          | Configuration                                   |
 | ------------------ | ----------------------------------------------- |
 | **PostgreSQL 17**  | Official postgres:17 Docker image               |
-| **PostgreSQL 18**  | Official postgres:18beta1 Docker image          |
+| **PostgreSQL 18**  | Official postgres:18 Docker image               |
 | **Database Name**  | `benchmark`                                     |
 | **User**           | `postgres`                                      |
 | **Port Mapping**   | PG17: 5434, PG18: 5435                          |
@@ -49,10 +49,10 @@ Identical configuration applied to both PostgreSQL 17 and 18 beta containers:
 
 | Parameter                            | Value  | Description                                       |
 | ------------------------------------ | ------ | ------------------------------------------------- |
-| **Single-threaded Iterations**       | 5,000  | Individual function calls for latency measurement |
-| **Concurrent Workers**               | 5      | Parallel processes for throughput testing         |
-| **Concurrent Iterations per Worker** | 500    | Operations per worker (2,500 total)               |
-| **Warmup Iterations**                | 10     | Initial calls to prime caches                     |
+| **Single-threaded Iterations**       | 50,000 | Individual function calls for latency measurement |
+| **Concurrent Workers**               | 10     | Parallel processes for throughput testing         |
+| **Concurrent Iterations per Worker** | 5,000  | Operations per worker (50,000 total)              |
+| **Warmup Iterations**                | 10,000 | Initial calls to prime caches                     |
 | **Collision Testing**                | 50,000 | IDs generated to verify uniqueness                |
 
 ### Test Environment Requirements
@@ -100,8 +100,8 @@ pip install psycopg[binary] matplotlib seaborn pandas
 
 1. **Container Startup Order**: PostgreSQL 17 and 18 start simultaneously
 2. **Initialization Wait**: 10-second delay after `pg_isready` confirms readiness
-3. **Function Warmup**: 10 iterations before timing measurements
-4. **Measurement Precision**: `time.perf_counter()` for microsecond accuracy
+3. **Function Warmup**: 10,000 iterations before timing measurements
+4. **Measurement Precision**: `time.perf_counter_ns()` for nanosecond accuracy
 5. **Random Seed**: Not fixed - represents real-world usage
 6. **System Load**: Benchmarks should run on idle systems for consistency
 

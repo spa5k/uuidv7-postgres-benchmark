@@ -10,7 +10,14 @@ from typing import Dict, List, Tuple, Optional, Any
 from contextlib import contextmanager
 from dataclasses import dataclass
 
-from .config import DatabaseConfig, DATABASE_CONFIGS, FUNCTION_CONFIGS
+from .config import (
+    BenchmarkConfig,
+    DatabaseConfig,
+    DATABASE_CONFIGS,
+    DEFAULT_BENCHMARK_CONFIG,
+    FUNCTION_CONFIGS,
+    POSTGRES_BENCHMARK_SETTINGS,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -29,9 +36,10 @@ class DatabaseInfo:
 class DatabaseManager:
     """Manages database connections and initialization"""
 
-    def __init__(self):
+    def __init__(self, benchmark_config: BenchmarkConfig = DEFAULT_BENCHMARK_CONFIG):
         self.db_info: Dict[str, DatabaseInfo] = {}
         self.connection_pools: Dict[str, Any] = {}
+        self.benchmark_config = benchmark_config
 
     @contextmanager
     def get_connection(self, config: DatabaseConfig):
@@ -39,7 +47,14 @@ class DatabaseManager:
         conn = None
         try:
             # Use conninfo string format for psycopg3 compatibility
-            conninfo = f"host={config.host} port={config.port} dbname={config.database} user={config.user} password={config.password} connect_timeout=10"
+            conninfo = (
+                f"host={config.host} "
+                f"port={config.port} "
+                f"dbname={config.database} "
+                f"user={config.user} "
+                f"password={config.password} "
+                f"connect_timeout={self.benchmark_config.connection_timeout_seconds}"
+            )
             conn = psycopg.connect(conninfo)
             yield conn
         except Exception as e:
@@ -196,11 +211,11 @@ class DatabaseManager:
                             "correct_format": self._validate_id_format(
                                 test_ids[0], func_config
                             ),
-                            "time_ordered": self._validate_time_ordering(
-                                test_ids, func_config
-                            )
-                            if func_config["time_ordered"]
-                            else None,
+                            "time_ordered": (
+                                self._validate_time_ordering(test_ids, func_config)
+                                if func_config["time_ordered"]
+                                else None
+                            ),
                             "sample_id": str(test_ids[0]),
                             "length_consistent": all(
                                 len(str(id)) == len(str(test_ids[0]))
@@ -286,17 +301,15 @@ class DatabaseManager:
         """Apply PostgreSQL optimizations for accurate benchmarking"""
         config = DATABASE_CONFIGS[db_name]
 
-        optimization_settings = [
-            "SET work_mem = '8MB'",
-            "SET maintenance_work_mem = '128MB'",
-            "SET effective_cache_size = '2GB'",
-            "SET random_page_cost = 1.1",
-            "SET effective_io_concurrency = 200",
-            "SET track_activities = off",
-            "SET track_counts = off",
-            "SET log_statement = 'none'",
-            "SET log_min_duration_statement = -1",
-        ]
+        optimization_settings = []
+
+        for key, value in POSTGRES_BENCHMARK_SETTINGS.items():
+            optimization_settings.append(f"SET {key} = '{value}'")
+
+        # Enforce statement timeout based on config
+        if self.benchmark_config.function_timeout_seconds:
+            timeout_ms = int(self.benchmark_config.function_timeout_seconds * 1000)
+            optimization_settings.append(f"SET statement_timeout = {timeout_ms}")
 
         with self.get_connection(config) as conn:
             with conn.cursor() as cur:
@@ -325,13 +338,15 @@ class DatabaseManager:
                 stats["database_size_bytes"] = cur.fetchone()[0]
 
                 # Cache hit ratio
-                cur.execute("""
+                cur.execute(
+                    """
                     SELECT round(
                         100.0 * sum(blks_hit) / (sum(blks_hit) + sum(blks_read)), 2
                     ) as cache_hit_ratio
                     FROM pg_stat_database 
                     WHERE datname = current_database()
-                """)
+                """
+                )
                 result = cur.fetchone()
                 stats["cache_hit_ratio"] = result[0] if result[0] else 0
 

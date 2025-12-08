@@ -29,11 +29,16 @@ class BenchmarkConfig:
     concurrent_workers: int = 10  # More workers for realistic load
     concurrent_iterations_per_worker: int = 5000  # 5k per worker
     benchmark_runs: int = 5  # Run each benchmark 5 times
+    concurrent_warmup_iterations: int = 1000  # Pre-warm each worker before timing
 
     # Timeout and safety settings
     function_timeout_seconds: int = 30
     connection_timeout_seconds: int = 10
     max_memory_usage_mb: int = 1024  # 1GB limit
+
+    # Validation settings
+    validation_sample_size: int = 500  # For format/time-order checks
+    collision_test_iterations: int = 50000  # For uniqueness testing
 
     # Output configuration
     detailed_logging: bool = True
@@ -152,17 +157,19 @@ FILE_TEMPLATES = {
 
 # PostgreSQL optimization settings for benchmarking
 POSTGRES_BENCHMARK_SETTINGS = {
-    "shared_buffers": "512MB",
-    "effective_cache_size": "2GB",
-    "work_mem": "8MB",
-    "maintenance_work_mem": "128MB",
-    "wal_buffers": "32MB",
-    "max_wal_size": "8GB",
-    "min_wal_size": "2GB",
+    # Aligned with docker-compose command settings for consistency
+    "shared_buffers": "256MB",
+    "effective_cache_size": "1GB",
+    "work_mem": "4MB",
+    "maintenance_work_mem": "64MB",
+    "wal_buffers": "16MB",
+    "max_wal_size": "4GB",
+    "min_wal_size": "1GB",
     "checkpoint_completion_target": "0.9",
     "random_page_cost": "1.1",
     "effective_io_concurrency": "200",
-    "max_connections": "300",
+    "default_statistics_target": "100",
+    "max_connections": "200",
     "log_statement": "none",
     "log_min_duration_statement": "-1",
     "track_activities": "off",
